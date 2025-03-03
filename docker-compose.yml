@@ -1,0 +1,25 @@
+services:
+  onlinesurveydb:
+    image: postgres:latest
+    ports:
+      - "5430:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  onlinesurveywebapi:
+    image: onlinesurveywebapiimage
+    container_name: onlinesurveywebapi
+    build: 
+      context: ./
+      dockerfile: ./OnlineSurvey.WebAPI/Dockerfile
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=onlinesurveydb;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+    depends_on:
+      - onlinesurveydb
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+
+volumes:
+  postgres_data:
